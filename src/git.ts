@@ -15,6 +15,17 @@ export async function runCommit(message: string): Promise<void> {
   await execFileAsync('git', ['commit', '-m', message], { encoding: 'utf-8' });
 }
 
+const SMART_COMMIT_CMD = 'npx --yes @aliklc/smart-commit';
+
+/**
+ * Git alias ekler: git smart-commit ve git sc (Git Bash dahil).
+ * npx kullanır ki PATH'te global bin olmasa da çalışsın.
+ */
+export async function setupGitAlias(): Promise<void> {
+  await execFileAsync('git', ['config', '--global', 'alias.smart-commit', `!${SMART_COMMIT_CMD}`], { encoding: 'utf-8' });
+  await execFileAsync('git', ['config', '--global', 'alias.sc', `!${SMART_COMMIT_CMD}`], { encoding: 'utf-8' });
+}
+
 const NO_STAGED_FILES_MESSAGE =
   'Lütfen önce dosyalarınızı "git add" ile ekleyin.';
 

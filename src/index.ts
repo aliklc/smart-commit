@@ -11,11 +11,25 @@ import inquirer from 'inquirer';
 import ora from 'ora';
 import { generateCommitMessage, getApiKeyMissingMessage, GEMINI_SETUP_URL } from './ai';
 import { ensureApiKey } from './setup';
-import { getStagedDiff, runCommit } from './git';
+import { getStagedDiff, runCommit, setupGitAlias } from './git';
 
 type Choice = 'evet' | 'hayir' | 'yeniden';
 
 async function main(): Promise<void> {
+  const setupAlias = process.argv.includes('--setup-git-alias') || process.argv.includes('-s');
+  if (setupAlias) {
+    try {
+      await setupGitAlias();
+      console.log(chalk.green('✓ Git alias eklendi. Artık kullanabilirsin:'));
+      console.log(chalk.cyan('  git smart-commit'));
+      console.log(chalk.cyan('  git sc'));
+      return;
+    } catch (e) {
+      console.error(chalk.red('Git alias eklenemedi.'), e);
+      process.exit(1);
+    }
+  }
+
   try {
     const diff = await getStagedDiff();
     await ensureApiKey();
