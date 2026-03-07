@@ -1,26 +1,41 @@
 {
   "name": "smart-commit",
   "version": "1.0.0",
-  "description": "AI destekli Conventional Commits CLI - git diff ile otomatik commit mesajı üretir",
+  "description": "AI-powered Conventional Commits CLI — generates commit messages from git diff (Gemini)",
   "main": "dist/index.js",
   "bin": {
     "smart-commit": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "keywords": [
     "git",
     "commit",
     "cli",
     "ai",
-    "conventional-commits"
+    "conventional-commits",
+    "gemini",
+    "commit-message"
   ],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aliklc/smart-commit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aliklc/smart-commit/issues"
+  },
+  "homepage": "https://github.com/aliklc/smart-commit#readme",
   "type": "commonjs",
   "engines": {
     "node": ">=20"
