@@ -28,28 +28,28 @@ smart-commit
 ```
 
 3. First time only: you’ll be asked for a **Gemini API key** (free at [Google AI Studio](https://aistudio.google.com/apikey)). Paste it; the tool saves it to `.env` in the current project and won’t ask again.
-4. Review the suggested commit message, then choose **Evet** (commit), **Hayır** (cancel), or **Yeniden Üret** (regenerate).
+4. Review the suggested commit message, then choose **Yes** (commit), **No** (cancel), or **Regenerate**.
 
-### Git Bash / Git komutu gibi kullanım
+### Use as a Git command (Git Bash, etc.)
 
-Komutu doğrudan **Git Bash** içinden `git sc` veya `git smart-commit` olarak kullanmak için bir kez alias ekle:
+To run it as `git sc` or `git smart-commit` from any terminal (including Git Bash), add the alias once:
 
-**Git Bash’te** (önerilen):
+**From Git Bash** (recommended):
 
 ```bash
 npx @aliklc/smart-commit --setup-git-alias
 ```
 
-Global kurulum yaptıysan: `smart-commit -s` veya `smart-commit --setup-git-alias`
+If you installed globally: `smart-commit -s` or `smart-commit --setup-git-alias`
 
-Bundan sonra herhangi bir Git deposunda (Git Bash dahil) şunları kullanabilirsin:
+Then in any Git repo you can use:
 
 ```bash
 git smart-commit
 git sc
 ```
 
-Önce `git add` ile dosyalarını stage’le, sonra `git sc` çalıştır.
+Stage your files with `git add` first, then run `git sc`.
 
 ## Requirements
 

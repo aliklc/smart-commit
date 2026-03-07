@@ -1,5 +1,5 @@
 /**
- * İlk kullanımda API anahtarı isteyip .env'e yazar; kullanıcı manuel .env ile uğraşmaz.
+ * On first run, prompts for API key and writes to .env so the user does not edit it manually.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -26,27 +26,27 @@ function saveApiKeyToEnv(key: string): void {
 }
 
 /**
- * API anahtarı yoksa kullanıcıdan isteyip .env'e yazar. Sonra process.env'de key hazır olur.
+ * If API key is missing, prompts the user and writes to .env, then sets process.env.
  */
 export async function ensureApiKey(): Promise<void> {
   if (process.env[ENV_KEY]?.trim()) return;
 
-  console.log(chalk.cyan('Smart Commit için bir kez Gemini API anahtarı gerekiyor (ücretsiz).'));
+  console.log(chalk.cyan('Smart Commit needs a Gemini API key once (free).'));
   console.log(chalk.gray('→ ' + GEMINI_SETUP_URL));
   console.log();
 
   const { key } = await inquirer.prompt<{ key: string }>({
     type: 'input',
     name: 'key',
-    message: 'API anahtarını yapıştır:',
-    validate: (v) => (v?.trim() ? true : 'Anahtar boş olamaz'),
+    message: 'Paste your API key:',
+    validate: (v) => (v?.trim() ? true : 'Key cannot be empty'),
   });
 
   if (!key?.trim()) {
-    console.log(chalk.yellow('Çıkılıyor. İstediğin zaman tekrar dene.'));
+    console.log(chalk.yellow('Exiting. Run again when ready.'));
     process.exit(0);
   }
 
   saveApiKeyToEnv(key.trim());
-  console.log(chalk.green('✓ Anahtar .env dosyasına kaydedildi. Bir daha sormayacağım.\n'));
+  console.log(chalk.green('✓ Key saved to .env. You won’t be asked again.\n'));
 }

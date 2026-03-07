@@ -1,6 +1,6 @@
 {
   "name": "@aliklc/smart-commit",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "AI-powered Conventional Commits CLI — generates commit messages from git diff (Gemini)",
   "main": "dist/index.js",
   "bin": {

@@ -1,5 +1,5 @@
 /**
- * AI entegrasyonu - commit mesajı üretimi (Google Gemini)
+ * AI integration — commit message generation (Google Gemini).
  */
 
 import { GoogleGenAI } from '@google/genai';
@@ -34,22 +34,22 @@ Code changes (git diff):
 `;
 
 /**
- * Staged diff'i AI'a gönderip Conventional Commits uyumlu commit mesajı üretir.
- * GEMINI_API_KEY .env dosyasında tanımlı olmalı.
+ * Sends staged diff to AI and returns a Conventional Commits–style message.
+ * GEMINI_API_KEY must be set (e.g. in .env).
  */
 export const GEMINI_SETUP_URL = 'https://aistudio.google.com/apikey';
 
 export function getApiKeyMissingMessage(): string {
   return [
-    'GEMINI_API_KEY bulunamadı. Tek seferlik kurulum (ücretsiz):',
+    'GEMINI_API_KEY not found. One-time setup (free):',
     '',
     '  1. ' + GEMINI_SETUP_URL,
-    '  2. "Create API key" ile anahtar oluştur',
-    '  3. Proje kökünde .env dosyası oluştur:',
-    '     GEMINI_API_KEY=buraya_anahtarini_yapistir',
+    '  2. Create an API key',
+    '  3. Add to your project root .env:',
+    '     GEMINI_API_KEY=your_key_here',
     '',
-    'Alternatif: GEMINI_API_KEY=anahtarin smart-commit',
-    'Sonra smart-commit tekrar çalıştır.',
+    'Or run: GEMINI_API_KEY=your_key smart-commit',
+    'Then run smart-commit again.',
   ].join('\n');
 }
 
@@ -67,7 +67,7 @@ export async function generateCommitMessage(diff: string): Promise<string> {
 
   const text = response.text;
   if (!text || typeof text !== 'string') {
-    throw new Error('AI geçerli bir commit mesajı döndürmedi.');
+    throw new Error('AI did not return a valid commit message.');
   }
 
   let raw = text.trim().replace(/^["']|["']$/g, '');
@@ -102,7 +102,7 @@ export async function generateCommitMessage(diff: string): Promise<string> {
     const emoji = type && type in emojiByType ? emojiByType[type] : '📦';
     subjectLine = `${emoji} ${subjectLine}`;
   }
-  // Konu satırında emojiden sonraki ilk harfi büyüt (fallback)
+  // Capitalize first letter after emoji on subject line (fallback)
   subjectLine = subjectLine.replace(/^([\p{Emoji}\p{Symbol}]\s+)([a-z])/u, (_, prefix, c) => prefix + c.toUpperCase());
 
   const message = body ? `${subjectLine}\n\n${body}` : subjectLine;
