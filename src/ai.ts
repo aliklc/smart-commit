@@ -37,12 +37,26 @@ Code changes (git diff):
  * Staged diff'i AI'a gönderip Conventional Commits uyumlu commit mesajı üretir.
  * GEMINI_API_KEY .env dosyasında tanımlı olmalı.
  */
+export const GEMINI_SETUP_URL = 'https://aistudio.google.com/apikey';
+
+export function getApiKeyMissingMessage(): string {
+  return [
+    'GEMINI_API_KEY bulunamadı. Tek seferlik kurulum (ücretsiz):',
+    '',
+    '  1. ' + GEMINI_SETUP_URL,
+    '  2. "Create API key" ile anahtar oluştur',
+    '  3. Proje kökünde .env dosyası oluştur:',
+    '     GEMINI_API_KEY=buraya_anahtarini_yapistir',
+    '',
+    'Alternatif: GEMINI_API_KEY=anahtarin smart-commit',
+    'Sonra smart-commit tekrar çalıştır.',
+  ].join('\n');
+}
+
 export async function generateCommitMessage(diff: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
-    throw new Error(
-      'GEMINI_API_KEY bulunamadı. .env dosyasına ekleyin veya https://aistudio.google.com/apikey adresinden API anahtarı alın.'
-    );
+    throw new Error(getApiKeyMissingMessage());
   }
 
   const ai = new GoogleGenAI({ apiKey });

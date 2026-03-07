@@ -9,7 +9,8 @@ import 'dotenv/config';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
-import { generateCommitMessage } from './ai';
+import { generateCommitMessage, getApiKeyMissingMessage, GEMINI_SETUP_URL } from './ai';
+import { ensureApiKey } from './setup';
 import { getStagedDiff, runCommit } from './git';
 
 type Choice = 'evet' | 'hayir' | 'yeniden';
@@ -17,6 +18,7 @@ type Choice = 'evet' | 'hayir' | 'yeniden';
 async function main(): Promise<void> {
   try {
     const diff = await getStagedDiff();
+    await ensureApiKey();
 
     let message: string;
     let loop = true;
@@ -58,7 +60,12 @@ async function main(): Promise<void> {
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(chalk.red(msg));
+    if (msg.includes('GEMINI_API_KEY bulunamadı')) {
+      console.error(chalk.yellow(getApiKeyMissingMessage()));
+      console.error(chalk.cyan('\n→ ' + GEMINI_SETUP_URL));
+    } else {
+      console.error(chalk.red(msg));
+    }
     process.exit(1);
   }
 }
