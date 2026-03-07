@@ -4,23 +4,31 @@
 
 import { GoogleGenAI } from '@google/genai';
 
-const COMMIT_PROMPT = `You are an expert developer. Review the code changes below and return a single git commit message that:
-1. Follows Conventional Commits (feat, fix, chore, docs, refactor, style, test, perf).
-2. Is written entirely in English.
-3. Starts with exactly one emoji that matches the type:
-   - feat → ✨
-   - fix → 🐛
-   - chore → 🔧
+const COMMIT_PROMPT = `You are an expert developer. Review the code changes below and return a git commit message in this exact format:
+
+1. SUBJECT (first line): One emoji + one capitalized verb + short summary. No "feat:" or "fix:" prefix. Emoji by change type:
+   - new feature → ✨
+   - bug fix → 🐛
+   - chore/tooling → 🔧
    - docs → 📝
    - refactor → ♻️
    - style → 💄
    - test → ✅
-   - perf → ⚡
+   - performance → ⚡
    - other → 📦
-4. After the type and colon, the description must start with a verb in imperative mood, capitalized (e.g. Add, Fix, Update, Remove).
 
-Example: ✨ feat: Add user login endpoint
-Output only the single line commit message, no other text.
+2. BODY (after a blank line): List the concrete changes as bullet points. Each line must start with "- " (hyphen + space). Use 2-6 bullets. Full sentences, English only.
+
+Example:
+♻️ Refactor phone input handling and date formatting
+
+- Introduced a new PhoneInput component to encapsulate phone number input logic, including country selection and local number formatting.
+- Replaced inline phone input logic in AddressFormScreen and EditProfileScreen with the new PhoneInput component.
+- Added utility functions for date formatting: formatDateDot and formatDateSlash for consistent date display across the application.
+- Updated GreenCardQuotationScreen, InsuranceSuccessScreen, and TravelQuotationScreen to use the new date formatting utilities.
+- Refactored phone number parsing logic into a separate phoneUtils module for better code organization and reusability.
+
+Output only the commit message (subject, blank line, bullet list). No code blocks or extra text.
 
 Code changes (git diff):
 `;
@@ -48,9 +56,13 @@ export async function generateCommitMessage(diff: string): Promise<string> {
     throw new Error('AI geçerli bir commit mesajı döndürmedi.');
   }
 
-  let message = text.trim().replace(/^["']|["']$/g, '').split('\n')[0].trim();
+  let raw = text.trim().replace(/^["']|["']$/g, '');
+  raw = raw.replace(/^```\w*\n?|```\s*$/g, '').trim();
+  const lines = raw.split('\n').map((l) => l.trimEnd());
+  const subject = lines[0] ?? '';
+  const bodyLines = lines.slice(1);
+  const body = bodyLines.join('\n').trim();
 
-  // Emoji yoksa conventional type'a göre başa ekle (fallback)
   const emojiByType: Record<string, string> = {
     feat: '✨',
     fix: '🐛',
@@ -61,15 +73,24 @@ export async function generateCommitMessage(diff: string): Promise<string> {
     test: '✅',
     perf: '⚡',
   };
-  const hasLeadingEmoji = /^[\p{Emoji}\p{Symbol}]/u.test(message);
+
+  let subjectLine = subject;
+  const hasLeadingEmoji = /^[\p{Emoji}\p{Symbol}]\s/u.test(subjectLine);
   if (!hasLeadingEmoji) {
-    const typeMatch = message.match(/^(feat|fix|chore|docs|refactor|style|test|perf)(!)?\s*:/i);
-    const emoji = typeMatch ? emojiByType[typeMatch[1].toLowerCase()] : '📦';
-    message = `${emoji} ${message}`;
+    const verbMatch = subjectLine.match(/^(refactor|add|fix|update|remove|introduce|chore|docs|style|test|perf)\s+/i);
+    const verbToType: Record<string, keyof typeof emojiByType> = {
+      add: 'feat',
+      introduce: 'feat',
+      update: 'chore',
+      remove: 'chore',
+    };
+    const type = verbMatch ? (verbToType[verbMatch[1].toLowerCase()] ?? verbMatch[1].toLowerCase()) : undefined;
+    const emoji = type && type in emojiByType ? emojiByType[type] : '📦';
+    subjectLine = `${emoji} ${subjectLine}`;
   }
+  // Konu satırında emojiden sonraki ilk harfi büyüt (fallback)
+  subjectLine = subjectLine.replace(/^([\p{Emoji}\p{Symbol}]\s+)([a-z])/u, (_, prefix, c) => prefix + c.toUpperCase());
 
-  // Açıklama kısmı (type: sonrası) fiil ile başlamalı, büyük harf (fallback)
-  message = message.replace(/(:\s+)([a-z])/, (_, afterColon, firstChar) => afterColon + firstChar.toUpperCase());
-
+  const message = body ? `${subjectLine}\n\n${body}` : subjectLine;
   return message;
 }
