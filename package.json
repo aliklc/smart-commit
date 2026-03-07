@@ -1,10 +1,10 @@
 {
-  "name": "smart-commit",
-  "version": "1.0.0",
+  "name": "@aliklc/smart-commit",
+  "version": "2.2.0",
   "description": "AI-powered Conventional Commits CLI — generates commit messages from git diff (Gemini)",
   "main": "dist/index.js",
   "bin": {
-    "smart-commit": "./dist/index.js"
+    "smart-commit": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -30,7 +30,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aliklc/smart-commit.git"
+    "url": "git+https://github.com/aliklc/smart-commit.git"
   },
   "bugs": {
     "url": "https://github.com/aliklc/smart-commit/issues"

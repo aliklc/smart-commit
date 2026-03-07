@@ -9,13 +9,13 @@ AI-powered CLI that generates **Conventional Commits** (with emoji + bullet body
 ## Install
 
 ```bash
-npm install -g smart-commit
+npm install -g @aliklc/smart-commit
 ```
 
 Or use without installing:
 
 ```bash
-npx smart-commit
+npx @aliklc/smart-commit
 ```
 
 ## Use
