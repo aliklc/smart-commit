@@ -2,10 +2,18 @@
  * Git entegrasyonu - staged diff okuma
  */
 
-import { exec } from 'node:child_process';
+import { exec, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+/**
+ * Verilen mesajla git commit çalıştırır. Mesaj shell'e geçirilmez, güvenli.
+ */
+export async function runCommit(message: string): Promise<void> {
+  await execFileAsync('git', ['commit', '-m', message], { encoding: 'utf-8' });
+}
 
 const NO_STAGED_FILES_MESSAGE =
   'Lütfen önce dosyalarınızı "git add" ile ekleyin.';

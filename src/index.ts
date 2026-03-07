@@ -6,29 +6,59 @@
  */
 
 import 'dotenv/config';
+import chalk from 'chalk';
+import inquirer from 'inquirer';
 import ora from 'ora';
 import { generateCommitMessage } from './ai';
-import { getStagedDiff } from './git';
+import { getStagedDiff, runCommit } from './git';
+
+type Choice = 'evet' | 'hayir' | 'yeniden';
 
 async function main(): Promise<void> {
   try {
     const diff = await getStagedDiff();
 
-    const spinner = ora('AI mesajı düşünüyor...').start();
     let message: string;
-    try {
-      message = await generateCommitMessage(diff);
-      spinner.succeed('Commit mesajı üretildi.');
-    } catch (aiErr) {
-      spinner.fail('AI mesajı üretilemedi.');
-      throw aiErr;
-    }
+    let loop = true;
 
-    console.log('\nÖnerilen commit mesajı:', message);
-    // Faz 4: Evet/Hayır/Yeniden Üret ve git commit
+    while (loop) {
+      const spinner = ora('AI mesajı düşünüyor...').start();
+      try {
+        message = await generateCommitMessage(diff);
+        spinner.succeed('Commit mesajı üretildi.');
+      } catch (aiErr) {
+        spinner.fail('AI mesajı üretilemedi.');
+        throw aiErr;
+      }
+
+      console.log();
+      console.log(chalk.cyan('Önerilen commit mesajı:'), chalk.green(message));
+      console.log();
+
+      const { action } = await inquirer.prompt<{ action: Choice }>({
+        type: 'list',
+        name: 'action',
+        message: 'Bu mesajla commit atmak ister misin?',
+        choices: [
+          { name: 'Evet', value: 'evet' },
+          { name: 'Hayır', value: 'hayir' },
+          { name: 'Yeniden Üret', value: 'yeniden' },
+        ],
+      });
+
+      if (action === 'evet') {
+        await runCommit(message);
+        console.log(chalk.green('✓ Commit başarıyla atıldı.'));
+        loop = false;
+      } else if (action === 'hayir') {
+        console.log(chalk.yellow('İşlem iptal edildi.'));
+        loop = false;
+      }
+      // yeniden → loop devam eder, yeni mesaj üretilir
+    }
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error(message);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(chalk.red(msg));
     process.exit(1);
   }
 }

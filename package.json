@@ -27,10 +27,13 @@
   },
   "dependencies": {
     "@google/genai": "^1.0.0",
+    "chalk": "^4.1.2",
     "dotenv": "^16.4.0",
+    "inquirer": "^9.2.0",
     "ora": "^8.1.0"
   },
   "devDependencies": {
+    "@types/inquirer": "^9.0.0",
     "@types/node": "^22.0.0",
     "@types/ora": "^3.1.0",
     "ts-node": "^10.9.2",
