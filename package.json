@@ -1,0 +1,27 @@
+{
+  "name": "smart-commit",
+  "version": "1.0.0",
+  "description": "AI destekli Conventional Commits CLI - git diff ile otomatik commit mesajı üretir",
+  "main": "dist/index.js",
+  "bin": {
+    "smart-commit": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["git", "commit", "cli", "ai", "conventional-commits"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0"
+  }
+}
