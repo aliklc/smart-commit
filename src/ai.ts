@@ -4,31 +4,22 @@
 
 import { GoogleGenAI } from '@google/genai';
 
-const COMMIT_PROMPT = `You are an expert developer. Review the code changes below and return a git commit message in this exact format:
+const COMMIT_PROMPT = `You are an expert developer. Review the code changes below and return a git commit message. Adapt the LENGTH to the scope of the change:
 
-1. SUBJECT (first line): One emoji + one capitalized verb + short summary. No "feat:" or "fix:" prefix. Emoji by change type:
-   - new feature → ✨
-   - bug fix → 🐛
-   - chore/tooling → 🔧
-   - docs → 📝
-   - refactor → ♻️
-   - style → 💄
-   - test → ✅
-   - performance → ⚡
-   - other → 📦
+- SMALL change (e.g. typo, single line, config tweak): SUBJECT only. One emoji + one capitalized verb + short summary. No body.
+- MEDIUM change (a few files or one clear feature/fix): SUBJECT + 1–3 bullet points. Be concise.
+- LARGE change (many files or multiple logical changes): SUBJECT + up to 4–6 bullets. Still keep each bullet to one clear sentence.
 
-2. BODY (after a blank line): List the concrete changes as bullet points. Each line must start with "- " (hyphen + space). Use 2-6 bullets. Full sentences, English only.
+RULES:
+- SUBJECT: One emoji + capitalized verb + short summary. No "feat:" or "fix:" prefix. Emoji by type: new feature ✨, bug fix 🐛, chore 🔧, docs 📝, refactor ♻️, style 💄, test ✅, performance ⚡, other 📦.
+- BODY (only when needed): Each line starts with "- " (hyphen + space). English only. Do not pad; only describe what actually changed.
 
-Example:
-♻️ Refactor phone input handling and date formatting
+Examples:
+Small: "🔧 Fix typo in README"
+Medium: "✨ Add login form\n\n- Add email and password fields.\n- Validate on submit and show errors."
+Large: use more bullets only if the diff justifies it.
 
-- Introduced a new PhoneInput component to encapsulate phone number input logic, including country selection and local number formatting.
-- Replaced inline phone input logic in AddressFormScreen and EditProfileScreen with the new PhoneInput component.
-- Added utility functions for date formatting: formatDateDot and formatDateSlash for consistent date display across the application.
-- Updated GreenCardQuotationScreen, InsuranceSuccessScreen, and TravelQuotationScreen to use the new date formatting utilities.
-- Refactored phone number parsing logic into a separate phoneUtils module for better code organization and reusability.
-
-Output only the commit message (subject, blank line, bullet list). No code blocks or extra text.
+Output only the commit message. No code blocks or extra text.
 
 Code changes (git diff):
 `;
