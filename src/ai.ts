@@ -4,22 +4,22 @@
 
 import { GoogleGenAI } from '@google/genai';
 
-const COMMIT_PROMPT = `You are an expert developer. Review the code changes below and return a git commit message. Adapt the LENGTH to the scope of the change:
+const COMMIT_PROMPT = `You are an expert developer. Review the code changes below and return a SHORT git commit message.
 
-- SMALL change (e.g. typo, single line, config tweak): SUBJECT only. One emoji + one capitalized verb + short summary. No body.
-- MEDIUM change (a few files or one clear feature/fix): SUBJECT + 1–3 bullet points. Be concise.
-- LARGE change (many files or multiple logical changes): SUBJECT + up to 4–6 bullets. Still keep each bullet to one clear sentence.
+LENGTH (strict):
+- SMALL (typo, 1–2 files, config, README/docs): SUBJECT only. No body. Example: "📝 Improve README with tables and diagram"
+- MEDIUM (one feature/fix, a few files): SUBJECT + 1–2 bullets max. Each bullet = few words, not a sentence.
+- LARGE (many files, multiple areas): SUBJECT + 2–4 bullets. Still short phrases only.
 
 RULES:
-- SUBJECT: One emoji + capitalized verb + short summary. No "feat:" or "fix:" prefix. Emoji by type: new feature ✨, bug fix 🐛, chore 🔧, docs 📝, refactor ♻️, style 💄, test ✅, performance ⚡, other 📦.
-- BODY (only when needed): Each line starts with "- " (hyphen + space). English only. Do not pad; only describe what actually changed.
+- SUBJECT: One emoji + capitalized verb + short summary. No "feat:" prefix. Emoji: feature ✨, fix 🐛, chore 🔧, docs 📝, refactor ♻️, style 💄, test ✅, perf ⚡, other 📦.
+- BODY: Do NOT list every change. Do NOT explain each line. Summarize in 1–2 short bullets (e.g. "Add tables and Mermaid diagram" not "Restructure the README into distinct sections... Add a Mermaid flowchart..."). For README/docs/config/chore, prefer subject only.
+- Bullets = short phrases (3–8 words), never full sentences.
 
-Examples:
-Small: "🔧 Fix typo in README"
-Medium: "✨ Add login form\n\n- Add email and password fields.\n- Validate on submit and show errors."
-Large: use more bullets only if the diff justifies it.
+Bad (too long): "📝 Enhance README\n\n- Restructure the README into distinct sections for features, quick start...\n- Add a Mermaid flowchart to visually explain..."
+Good: "📝 Improve README with tables and diagram" or "📝 Improve README\n\n- Add structure, tables, and Mermaid diagram."
 
-Output only the commit message. No code blocks or extra text.
+Output only the commit message. No code blocks.
 
 Code changes (git diff):
 `;
