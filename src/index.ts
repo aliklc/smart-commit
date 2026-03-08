@@ -6,6 +6,7 @@
  */
 
 import 'dotenv/config';
+import { platform } from 'node:os';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
@@ -13,7 +14,13 @@ import { generateCommitMessage, getApiKeyMissingMessage, GEMINI_SETUP_URL } from
 import { ensureApiKey } from './setup';
 import { getStagedDiff, runCommit, setupGitAlias } from './git';
 
-type Choice = 'yes' | 'no' | 'regenerate';
+type Choice = 'yes' | 'no' | 'regenerate' | 'edit';
+
+/** Set EDITOR if missing so "Edit" opens the message in an editor (Windows → notepad). */
+function ensureEditor(): void {
+  if (process.env.EDITOR || process.env.VISUAL) return;
+  if (platform() === 'win32') process.env.EDITOR = 'notepad';
+}
 
 async function main(): Promise<void> {
   const setupAlias = process.argv.includes('--setup-git-alias') || process.argv.includes('-s');
@@ -34,18 +41,22 @@ async function main(): Promise<void> {
     const diff = await getStagedDiff();
     await ensureApiKey();
 
-    let message: string;
+    let message = '';
     let loop = true;
+    let skipGenerate = false;
 
     while (loop) {
-      const spinner = ora('Generating commit message...').start();
-      try {
-        message = await generateCommitMessage(diff);
-        spinner.succeed('Commit message generated.');
-      } catch (aiErr) {
-        spinner.fail('Failed to generate commit message.');
-        throw aiErr;
+      if (!skipGenerate) {
+        const spinner = ora('Generating commit message...').start();
+        try {
+          message = await generateCommitMessage(diff);
+          spinner.succeed('Commit message generated.');
+        } catch (aiErr) {
+          spinner.fail('Failed to generate commit message.');
+          throw aiErr;
+        }
       }
+      skipGenerate = false;
 
       console.log();
       console.log(chalk.cyan('Suggested commit message:'), chalk.green(message));
@@ -57,8 +68,9 @@ async function main(): Promise<void> {
         message: 'Commit with this message?',
         choices: [
           { name: 'Yes', value: 'yes' },
-          { name: 'No', value: 'no' },
+          { name: 'Edit', value: 'edit' },
           { name: 'Regenerate', value: 'regenerate' },
+          { name: 'No', value: 'no' },
         ],
       });
 
@@ -69,8 +81,19 @@ async function main(): Promise<void> {
       } else if (action === 'no') {
         console.log(chalk.yellow('Cancelled.'));
         loop = false;
+      } else if (action === 'edit') {
+        ensureEditor();
+        const { editedMessage } = await inquirer.prompt<{ editedMessage: string }>({
+          type: 'editor',
+          name: 'editedMessage',
+          message: 'Edit the message in your editor (save and close to confirm):',
+          default: message,
+        });
+        const trimmed = editedMessage?.trim();
+        if (trimmed) message = trimmed;
+        skipGenerate = true;
       }
-      // regenerate → loop continues, new message is generated
+      // regenerate → loop continues, skipGenerate is false so a new message is generated
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
