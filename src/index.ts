@@ -10,9 +10,9 @@ import { platform } from 'node:os';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import ora from 'ora';
-import { generateCommitMessage, getApiKeyMissingMessage, GEMINI_SETUP_URL } from './ai';
-import { ensureApiKey } from './setup';
-import { getStagedDiff, runCommit, setupGitAlias } from './git';
+import { generateCommitMessage, getApiKeyMissingMessage, GEMINI_SETUP_URL } from './ai/ai';
+import { ensureApiKey } from './setup/setup';
+import { getStagedDiff, runCommit, setupGitAlias } from './git/git';
 
 type Choice = 'yes' | 'no' | 'regenerate' | 'edit';
 
@@ -53,6 +53,12 @@ async function main(): Promise<void> {
           spinner.succeed('Commit message generated.');
         } catch (aiErr) {
           spinner.fail('Failed to generate commit message.');
+          const errMsg = aiErr instanceof Error ? aiErr.message : String(aiErr);
+          if (errMsg.includes('fetch failed') || errMsg.includes('ECONNREFUSED') || errMsg.includes('ENOTFOUND')) {
+            throw new Error(
+              errMsg + '\n\nPossible causes: no internet, firewall/proxy blocking, or Gemini API unreachable. Check your connection and try again.'
+            );
+          }
           throw aiErr;
         }
       }

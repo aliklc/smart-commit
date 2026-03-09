@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import { GEMINI_SETUP_URL } from './ai';
+import { GEMINI_SETUP_URL } from '../ai/ai';
 
 const ENV_KEY = 'GEMINI_API_KEY';
 const ENV_FILE = join(process.cwd(), '.env');
